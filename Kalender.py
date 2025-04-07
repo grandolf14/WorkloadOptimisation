@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import  QPushButton
 
 class dom():
 
-   
     #klassenmethoden    
     def consecutive(a,b):
         if dom.a(a)==dom.b(b) or dom.a(b)==dom.b(a):
