@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import  QPushButton
 class dom():
 
 
+
     def consecutive(self, other):
         """checks if two domains are consecutiv to eachother
 
@@ -15,7 +16,6 @@ class dom():
             return True
         else:
             return False
-
 
     def __eq__(self,other):
         """calculates the intersection of two domains, if there is any
@@ -29,14 +29,23 @@ class dom():
         else:
             return False
         
-    def __ne__(self,other):                                 # !=        überprüft ob die Inputdomains unterschiedlich sind
+    def __ne__(self,other):
+        """ checks the domains for similarity
+
+        :param other: domain object
+        :return: -> bool
+        """
         if self.a==other.a and self.b==other.b:
             return False
         else:
             return True 
    
-    def __add__(self,other):                                # +         gibt die Summe der Domainbereiche aus   (i)wenn ich nur intersection domains adden will:   if a==b: a+b
+    def __add__(self,other):
+        """returns both domains if they are neither consecutive nor intersect or the new domain if they do
 
+        :param other: domain object
+        :return: ->list [domain object]
+        """
         if self == other or dom.consecutive(self,other):
             if self.a < other.a:
                 a1 = self.a
@@ -52,7 +61,12 @@ class dom():
             
             return [self, other]
             
-    def __sub__(self,other):                                # -         gibt die Restdomain von self aus, nachdem other abgezogen wurde
+    def __sub__(self,other):
+        """deducts the other domain from self
+
+        :param other: domain object
+        :return: ->domain object
+        """
         if self==other:
             if self.a<other.a and self.b>other.b:
                  return ([dom(self.a,other.a),dom(other.b,self.b)])
@@ -69,7 +83,12 @@ class dom():
 
     #Instanzmethoden
  
-    def __init__(self,a,b):                                 # dom(x,y)                                      initialisiert eine neue domain
+    def __init__(self,a,b):
+        """initializes a new domain, the bigger value of the two being b and the smaller being a
+
+        :param a: int
+        :param b: int
+        """
         if a>b:
             self.a=b
             self.b=a
@@ -77,24 +96,43 @@ class dom():
             self.a=a
             self.b=b
             
-    def a(self):                                            # [dom objekt].a or dom.a([dom objekt])         gibt den startwert der domain aus
+    def a(self):
+        """ returns the start value of the domain
+
+        :return: ->int
+        """
         return self.a
     
-    def b(self):                                            # [dom objekt].b or dom.b([dom objekt])         gibt den endwert der domain aus
+    def b(self):
+        """ returns the end value of the domain
+
+        :return: ->int
+        """
         return self.b
     
-    def len(self):                                          # [dom objekt].len() or dom.a([dom objekt])     gibt den startwert der domain aus
+    def len(self):
+        """ returns the length of the domain
+
+        :return: ->int
+        """
         if self is None:
             return 0
         else:
             return self.b-self.a
 
-    def __repr__(self):                                     #                                               definiert die grafische Ausgabe eines Domainobjektes
+    def __repr__(self):
+        """defines the console depiction for a domain object
+
+        :return: ->str
+        """
         return "(%d to %d)" %(self.a,self.b)
 
 class Proj ():
+    """manages projects properties
 
-    #liste aller Instanzen
+    :var lst: list
+        contains all current project instances
+    """
     lst=[] 
 
     #klassenmethoden
