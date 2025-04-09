@@ -135,13 +135,13 @@ class Proj ():
     """
     lst=[] 
 
-    #klassenmethoden
-    def Rlst(a="x"):                                                    # Proj.Rlst()                                       gibt die Liste aller Projekte aus
-        if a=="x":
-            return Proj.lst
+    @classmethod
+    def Rlst(cls):
+        """returns the list of all current projects
 
-        else:
-            return Proj.lst
+        :return: -> list
+        """
+        return Proj.lst
         
     def __lt__(self,other):
         if self.internalname<other.internalname:
