@@ -144,13 +144,29 @@ class Proj ():
         return Proj.lst
         
     def __lt__(self,other):
+        """checks if the other project was initialized after self
+
+        :param other: domain object
+        :return: bool
+        """
         if self.internalname<other.internalname:
             return True
         else:
             return False
-        
-    #Instanzmethoden
-    def __init__(self, name, start=0,dauer=0,workload=0):               # Proj(name,start,dauer,workload)                   initialisiert neue Projektinstanzen
+
+    def __init__(self, name, start=0,dauer=0,workload=0):
+        """ initializes a new Proj and adds it to the list of all projects
+
+        :param name: int
+            internal name of project
+        :param start: int
+            relative startdate
+        :param dauer:  int
+            duration in days
+        :param workload: int
+            workload in hours
+        """
+
         self.internalname=name
         self.DOM= dom(start, start+dauer)       #Ursprungsdomain    
         self.WL=workload                        #Ursprungsworkload 
@@ -159,16 +175,28 @@ class Proj ():
         self.dom2=[]                            #finale bereiche
         self.domwl=[]                           #finale wl/bereich
         self.intersect=[]
-        self.marker=True                       #counter: bereiche, die 
+        self.marker=True
         Proj.lst.append(self)                   #fügt bei Projektinitialisierung das Projekt der klassenliste hinzu 
 
-    def DOM(self):                                                      # [Projekt].DOM or Proj.DOM([Projekt])              Ursprungsprojektbereich    (Input)
+    def DOM(self):
+        """returns the initalized domain
+
+        :return: domain object
+        """
         return self.DOM
     
-    def WL(self):                                                       # [Projekt].WL or Proj.WL([Projekt])                Ursprungsworkload          (Input)
+    def WL(self):
+        """returns the initalized workload
+
+        :return: ->int
+        """
         return self.WL
     
-    def len(self):                                                      # [Projekt].len() or Proj.len([Projekt])            Aktuelle summe der längen
+    def len(self):
+        """returns the total length of the current workload configuration
+
+        :return: ->int
+        """
         added=[]
         if len(self.dom2)!=0:
             for i in flatten(self.dom2):
@@ -178,15 +206,21 @@ class Proj ():
                 added.append(i.len())    
         return sum(added)
     
-    def dailywl(self):                                                  # [Projekt].dailywl() or Proj.dailywl([Projekt])    Durchschnittliches Tagesworkload
+    def dailywl(self):
+        """returns the current average workload or False if there is no current domain left for project
+
+        :return: -> int
+        """
         if self.len() >0:
             return self.WL/self.len()
         else:
             return False
     
-    def __repr__(self):                                                 #                                                   definiert die grafische Ausgabe der Projekte
-        #return "\nName: Proj"+str(self.internalname)+"\nDaten:"+str(self.DOM)+"\nIntersection:" +str(self.intersect)+"\nbereichcount: "+str(self.count)+"\nneue Daten:" +str(self.dom)+"\nfinale Daten:" +str(self.dom2)+"\nDauer:"+str(self.len())+"\nProjekt Workload:"+ str(self.WL)+ "\nTagesworkload:"+ str(self.dailywl())+"\n"
-        #return "\nName: Proj"+str(self.internalname)+"\nDaten:"+str(self.DOM)+"\nneue Daten:" +str(self.dom)+"\nfinale Daten:" +str(self.dom2)+ "\nfinWL: " +str(self.domwl)+"\nProjekt Workload:"+ str(self.WL)+"\nnegwl: "+str(self.negwl)+ "\n"
+    def __repr__(self):
+        """returns the console appearance if Proj is printed
+
+        :return: ->str
+        """
         return "\nName: Proj"+str(self.internalname)+"\nDaten:"+str(self.DOM)+"\nneue Daten:" +str(self.dom2)+"\nTagesworkload:"+ str([round(x,1) for x in self.domwl])+"\ndifferenz: "+str(self.WL)+" "+str(self.WL==self.negwl)+"\n"
 
 class superbereich():
