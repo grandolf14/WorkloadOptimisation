@@ -4,14 +4,25 @@ from PyQt5.QtWidgets import  QPushButton
 
 class dom():
 
-    #klassenmethoden    
-    def consecutive(a,b):
-        if dom.a(a)==dom.b(b) or dom.a(b)==dom.b(a):
+
+    def consecutive(self, other):
+        """checks if two domains are consecutiv to eachother
+
+        :param other: domain object
+        :return: ->bool
+        """
+        if self.a==other.b or other.a==self.b:
             return True
         else:
             return False
-    
-    def __eq__(self,other):                                 # ==        gibt die intersection der beiden Domains aus, gibt False aus,wenn keine Intersection vorhanden
+
+
+    def __eq__(self,other):
+        """calculates the intersection of two domains, if there is any
+
+        :param other: domain object
+        :return: -> domain object | False
+        """
         if dom.a(self)<dom.b(other) and dom.a(other)<dom.b(self):
             Newdomain=sorted([dom.a(self),dom.a(other),dom.b(self),dom.b(other)])
             return dom(Newdomain[1],Newdomain[2])
