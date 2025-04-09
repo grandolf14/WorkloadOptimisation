@@ -464,7 +464,13 @@ class PushButton(QPushButton):
 #endregion
 
 #initialisierungsmethoden
-def defIn(data_):                    #initialisiert daten in Projekte
+def defIn(data_):
+    """for each dataset initializes a project with given data
+
+    :param data_:list
+    :return: ->None
+    """
+
     add=len(Proj.lst)
     for i in range(len(data_)):
         Proj(i+add, data_[i][0], data_[i][1], data_[i][2])
@@ -839,53 +845,6 @@ def math():         #berechnet die optimale Projektverteilung
 
 
         waithere=0
-
-def outbereich():   #printed die liste der bereiche                    
-
-    new=sortDomlst(flatten([x.dom2 for x in Proj.Rlst()]))
-    newsorter=flatten([x.dom2 for x in Proj.Rlst()])
-    newwl=flatten([x.domwl for x in Proj.Rlst()])
-    newaufgaben=[]
-    for i in range(len([x.dom2 for x in Proj.Rlst()])):
-        newaufgaben.append([])
-        for j in [x.dom2 for x in Proj.Rlst()][i]:
-            newaufgaben[i].append(i)
-    newaufgaben=flatten(newaufgaben)
-
-    for i in range(len(new)-1):
-        if i+1>=len(new):
-            break
-        if not new[i]!=new[i+1]:
-            new.remove(new[i])
-
-    new=[[x]for x in new]
-
-    newfinal=[]
-    for i in new:
-        newfinal.append([])
-
-    newfinalaufgaben=[]
-    for i in new:
-        newfinalaufgaben.append([])
-
-    newfinalwl=[]
-    for i in new:
-        newfinalwl.append([])
-
-
-    for i in range(len(newsorter)):
-        for j in range(len(new)):
-            if not new[j][0]!=newsorter[i]:
-                newfinalaufgaben[j].append(newaufgaben[i])
-
-
-    for i in range(len(newsorter)):
-        for j in range(len(new)):
-            if not new[j][0]!=newsorter[i]:
-                newfinalwl[j].append(newwl[i])
-
-    for i in range(len(newfinal)):
-        print("\nbereich: "+str(new[i])+"\nProj: "+str([" Proj"+ str(newfinalaufgaben[i][x])+": "+str(round(newfinalwl[i][x],1)) for x in range(len(newfinalwl[i]))])+"\nTagesworkload: "+ str(round(sum(newfinalwl[i]),1))+"\n")
 
 def reset():
     """resets all class-lists for new calculation
