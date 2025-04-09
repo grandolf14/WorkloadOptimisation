@@ -223,13 +223,21 @@ class Proj ():
         """
         return "\nName: Proj"+str(self.internalname)+"\nDaten:"+str(self.DOM)+"\nneue Daten:" +str(self.dom2)+"\nTagesworkload:"+ str([round(x,1) for x in self.domwl])+"\ndifferenz: "+str(self.WL)+" "+str(self.WL==self.negwl)+"\n"
 
-class superbereich():
 
-    # Klassenlisten
-    lst=[]                                              #liste aller aktiven Instanzen
+#TODO annotations superbereich
+class superbereich():
+    """manages the parent sectors for each sector
+
+    :var lst: list
+        contains all current parent sectors
+
+    :var name: int
+        the name counter
+
+    """
+    lst=[]
     name=0
 
-    #Instanzmethoden
     def __init__(self,domain=0,projekte=0,children=0):             
         self.internalname="superbereich "+str(superbereich.name)
         if children==0:
@@ -286,8 +294,7 @@ class superbereich():
 class bereich():
 
     #Klassenlisten
-    lst=[] 
-
+    lst=[]
     name=0
     
     
@@ -439,7 +446,8 @@ class bereich2():
         bereich2.lst.append(self)
 
 
-    def __repr__(self):                     #definiert die grafische Darstellung
+    def __repr__(self):
+
         return str(self.dom)+ str(self.wl)
 
 class PushButton(QPushButton):
@@ -878,11 +886,12 @@ def outbereich():   #printed die liste der bereiche
 
     for i in range(len(newfinal)):
         print("\nbereich: "+str(new[i])+"\nProj: "+str([" Proj"+ str(newfinalaufgaben[i][x])+": "+str(round(newfinalwl[i][x],1)) for x in range(len(newfinalwl[i]))])+"\nTagesworkload: "+ str(round(sum(newfinalwl[i]),1))+"\n")
-  
-def Bugfixmode():
-    return False
 
 def reset():
+    """resets all class-lists for new calculation
+
+    :return: ->None
+    """
     Proj.lst=[]
     superbereich.lst=[]
     bereich.lst=[]
