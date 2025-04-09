@@ -476,6 +476,12 @@ def defIn(data_):
         Proj(i+add, data_[i][0], data_[i][1], data_[i][2])
     
 def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,proj3]]
+    """
+
+    :param Liste:
+    :param marker:
+    :return: ->list
+    """
     Newlist=[]
     for i in Liste:
         Bereiche=flatten([listjoin([x.dom for x in flatten(i)])])
@@ -545,7 +551,13 @@ def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,
     return Newlist
 
 #werkzeugmethoden
-def listjoin(a1):                       #erstellt die Summe aller Domains einer Liste als Domains
+def listjoin(a1):
+    """
+
+    :param a1:
+    :return:
+    """
+    #erstellt die Summe aller Domains einer Liste als Domains
     a1=flatten(a1)
     if len(a1)>1:
         a1=sortDomlst(a1)
@@ -567,7 +579,12 @@ def listjoin(a1):                       #erstellt die Summe aller Domains einer 
     else:
         return a1
 
-def sortDomlst(a):                      # sortiert eine Liste von Domains aufsteigend nach startzeitpunkt und Länge
+def sortDomlst(a):
+    """sorts a list of domains ascending by startdate and duration
+
+    :param a: list, containing domain objects
+    :return: ->list
+    """
     a1=[a.pop(0)]
     for j in range(len(a)):
         for i in range(len(a1)+1):
@@ -614,7 +631,13 @@ def sortprojlistmaxdailywl(a):             # a= bereichliste
     return a1
 
 #listmanagement       
-def flatten(input):                     # reduziert eine mehrdimensionale Liste in eine 1d Liste 
+def flatten(input):
+    """reduces a mulit-dimensional list into one single list
+
+    :param input: list, multidimensional
+    :return: ->list
+    """
+
     newlst=[input]
     if type(input)==list:
         newlst=[]
@@ -626,10 +649,17 @@ def flatten(input):                     # reduziert eine mehrdimensionale Liste 
                 newlst.append(k)
     return newlst
 
-def shiftpath(input):                   #reduziert  eine mehrdimensionale Liste auf eine 2d Liste bestehend aus einer Hauptliste und der untersten Listenebene jeder Liste
+def shiftpath(input):
+    """reduces a multi-nested-list to only contain the last sublist of each list
+
+    :param input: multi-nested-list
+    :return: ->list
+    """
     Newlist=[[]]
     k=0
     i=0
+
+    # the function recursive calls itself until type(dataObject)!= list and returns this datum
     while i <=len(Newlist):
         while k<len(input):
             if type(input[k])==list:
@@ -655,12 +685,13 @@ def shiftpath(input):                   #reduziert  eine mehrdimensionale Liste 
 
     return Newlist
 
-def math():         #berechnet die optimale Projektverteilung
-    
-    new=[x.DOM for x in Proj.Rlst()]
+def math():
+    """calculates the optimal workload distribution
+
+    :return: ->None
+    """
 
     new=shiftpath(sortprojforsuperbereiche([Proj.Rlst()]))
-
 
     #region     superbereiche join überprüfen 
     superbereiche=[]
@@ -856,8 +887,12 @@ def reset():
     bereich.lst=[]
     bereich2.lst=[]
 
-
 def main(data=[]):
+    """initializes new projects and the workload optimization
+
+    :param data: list
+    :return:
+    """
     reset()
 
     if len(data)==0:
