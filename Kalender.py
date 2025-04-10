@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import  QPushButton
 
 #region Klassen
 
+#TODO annotations
 class dom():
 
 
@@ -127,6 +128,7 @@ class dom():
         """
         return "(%d to %d)" %(self.a,self.b)
 
+#TODO annotations
 class Proj ():
     """manages projects properties
 
@@ -221,6 +223,7 @@ class Proj ():
 
         :return: ->str
         """
+        return "Proj"+str(self.internalname)
         return "\nName: Proj"+str(self.internalname)+"\nDaten:"+str(self.DOM)+"\nneue Daten:" +str(self.dom2)+"\nTagesworkload:"+ str([round(x,1) for x in self.domwl])+"\ndifferenz: "+str(self.WL)+" "+str(self.WL==self.negwl)+"\n"
 
 
@@ -270,8 +273,14 @@ class superbereich():
     def __repr__(self):                         #                                                                       definiert die grafische Ausgabe von Superbereichen
         return "\nBereiche:"+str(self.dom())+"mediumwl: "+str(self.mediumwl())+"\nprojekte"+str([x.internalname for x in self.proj()])#+  sort  "bereiche:"+str(self.bereiche) #+"mediumwl:"+str(self.mediumwl())
 
-    #Klassenmethoden
-    def initialise(bereiche,bereichsprojekte):          # superbereich.initialise(domains,projekte)                             initialisiert eine Reihe von Instanzen aus Listen von zugeordneten Werten 
+    @classmethod
+    def initialise(cls,bereiche,bereichsprojekte):#initialisiert eine Reihe von Instanzen aus Listen von zugeordneten Werten
+        """initializes superbereich objects from each index of bereiche and bereichsprojekte
+
+        :param bereiche: list of domain-lists for each superbereich
+        :param bereichsprojekte: list of project-lists for each superbereich
+        :return: ->None
+        """
         new2=[]
         for i in range(len(bereichsprojekte)):
             new2.append([])
@@ -291,9 +300,14 @@ class superbereich():
 
         [superbereich(flatten(new3[x]),bereichsprojekte[x]) for x in range(len(new3))]
 
+#TODO annotations
 class bereich():
+    """provides functions to work with sectors
 
-    #Klassenlisten
+    :var lst: list, list of all initialized sectors
+    :var name: int, private
+        provides unique names for all sectors
+    """
     lst=[]
     name=0
     
@@ -302,7 +316,7 @@ class bereich():
         
     #Instanzmethoden
     
-    def __init__(self,domain=[],projekte=[],parent=[],children=False):           
+    def __init__(self,domain=[],projekte=[],parent=[],children=False):
         self.internalname="bereich "+str(bereich.name)
         self.parent=parent
         if children:
@@ -314,34 +328,48 @@ class bereich():
         bereich.lst.append(self)
 
     def active(self):
+
         return flatten([[x.active for x in self.children if x],False])[0]
 
     def DOM(self):
+        """returns the domains of the children"""
         return listjoin([x.dom for x in self.children])
 
     def dom(self):
+        """returns the domains of the sectors children if they do not exceed the mediumwl"""
         return listjoin([x.dom for x in self.children if x.wl<self.parent.mediumwl()-0.001])
 
     def proj(self):
+        """returns the active projects of this sector, which are not finished"""
         return [x for x in list(set(flatten([x.proj for x in self.children]))) if x.WL-x.negwl>0]
     
     def PROJ(self):
+        """returns all active projects of the sector"""
         return sorted(list(set(flatten([x.proj for x in self.children]))))
     
-    def len(self):                                                                  #gibt die länge des aktiven Bereichs wieder
+    def len(self):
+        """returns the current sector length"""
+
         return sum([x.len() for x in self.dom()])
        
-    def __repr__(self):                                                             #definiert die grafische Ausgabe der Instanzen
+    def __repr__(self):
+        """defines the console representation of class bereich"""
         return "\n"+str(self.dom())+"  "+str(["  Proj"+str(x.internalname) for x in self.proj()])+str(self.children)+str(self.parent)
-
 
 
     @classmethod
     def Rlst(cls):
+        """readonly bereich.lst"""
         return bereich.lst
 
+    @classmethod
+    def update(cls):
+        """searches the current bereich.lst for bereiche with identical projectspread and creates a new bereich
+            object joining the old and corresponding superbereich if necessary
 
-    def update():                                           #aktualisiert die Liste aktiver Instanzen 
+        :return: ->None
+        """
+        #for each bereich searches for index of bereiche with same projects
         newlist=[]
         for i in range(len(bereich.lst)):
             newlist.append([])
@@ -359,14 +387,14 @@ class bereich():
                         newlist[i].append(i+j)
                                                         
 
-
-        for z in range(len(newlist)):
+        # creates the merged list of all bereiche with completly identical projects
+        for z in range(len(newlist)):           #TODO remove z loop, never used
             for i in range(len(newlist)):
                 for j in range(len(newlist[i])):
                     newlist[i].extend(flatten(newlist[newlist[i][j]]))
                     newlist[i]=list(set(newlist[i]))
 
-        
+        #for each bereich alle bereiche with identical projectspread
         newlist2=[]
         for i in range(len(newlist)):
             newlist2.append([])
@@ -381,13 +409,14 @@ class bereich():
                     newlist2[i].extend([bereich.lst[newlist[i][j]]])
                     newlist2[i]=flatten(newlist2[i])
                     newlist[newlist[i][j]]=["x"]
-        
+
+        #newlist = newlist2 without empty lists
         newlist=[]
         for i in newlist2:
             if len(i)>0:
                 newlist.append(i)
 
-        
+        #selects all children for the sector
         newlistchildren=[]
         for i in range(len(newlist)):
             newlistchildren.append([])
@@ -395,18 +424,20 @@ class bereich():
                 for k in newlist[i][j].children:
                     newlistchildren[i].append(k)
         
-        
+        #creates the new bereich objects with corresponding children and parent
         finallist=[]
         for i in range(len(newlist)):
             finallist.append(bereich(parent=newlist[i][0].parent,children=flatten(newlistchildren[i])))
 
 
-        #if len(list(set([x.proj for x in finallist])))>1:
-        for i in superbereich.lst:                                              #fehler
+        # updates childrens of superbereich to new bereich
+        for i in superbereich.lst:                                              #fehler?
             i.children=flatten([x for x in finallist if x.parent is i and len(x.proj())>0])
 
+        # removes all appearance of bereich in any superbereichs children, if the bereichs average workload exceeds the
+        # parents workload, in that case construct a new superbereich as parent for the bereich object
         for i in finallist: 
-            if len(i.proj())>0 and (sum([x.WL for x in i.PROJ()])/sum([x.len() for x in i.DOM()]))<i.parent.mediumwl():     #fehler?                     #wenn der eigene max Mediumwl kleiner als der parentmediumwl 
+            if len(i.proj())>0 and (sum([x.WL for x in i.PROJ()])/sum([x.len() for x in i.DOM()]))<i.parent.mediumwl():     #fehler? #wenn der eigene max Mediumwl kleiner als der parentmediumwl
                 for j in superbereich.lst:
                     if i in j.children:
                             j.children.remove(i)
@@ -422,19 +453,28 @@ class bereich():
 
         #Progaufgabe:  update superbereich einfügen?
 
+        # updates the old bereich.lst with new bereiche
         bereich.lst=finallist
 
+#TODO annotations
 class bereich2():
+    """subsectors are the smallest unit of sectors with equal workload
 
-    #Klassenlisten
+    :var lst: list of all initialized bereich2 objects
+
+    :var name: int, private
+        provides internal name data
+    """
     lst=[]
     name=0
 
-       
-    #Instanzmethoden
-    
     def __init__(self,domain,projekte,parent):
-                     #bereich2
+        """
+
+        :param domain:
+        :param projekte:
+        :param parent:
+        """
         self.internalname="bereich2 "+str(bereich2.name)
         self.parent=parent
         self.dom=domain
@@ -450,6 +490,7 @@ class bereich2():
 
         return str(self.dom)+ str(self.wl)
 
+#TODO annotations
 class PushButton(QPushButton):
 
     def __init__(self, Proj, Parent=None):
@@ -634,7 +675,8 @@ def sortprojlistdailywl(a):
                 break
         a1.insert(i,a[j])
     return a1
-   
+
+#TODO annotations
 def sortprojlistmaxdailywl(a):             # a= bereichliste
     a1=[]
     for j in range(len(a)):
@@ -708,18 +750,22 @@ def shiftpath(input):
 
     return Newlist
 
+#TODO annotations
 def math():
-    """calculates the optimal workload distribution
+    """calculates the optimal workload distribution and inserts the optimal distribution into the projects
 
     :return: ->None
     """
 
-    new=shiftpath(sortprojforsuperbereiche([Proj.Rlst()]))
+    new=shiftpath(sortprojforsuperbereiche([Proj.Rlst()])) # contains the lists of parentsectors [list of projects]
 
-    #region     superbereiche join überprüfen 
+    #region     superbereiche join überprüfen
+
+    # creates domain lists for each parentsector
     superbereiche=[]
     for i in new:
         superbereiche.append(flatten(listjoin(flatten([x.dom for x in i]))))
+
 
     Superbereichejoin=[]
     for i in range(len(superbereiche)):
@@ -778,7 +824,7 @@ def math():
 
     #endregion
 
-    superbereich.initialise(superbereiche,superbereicheProj)
+    superbereich.initialise(superbereiche,superbereicheProj)  #initialisisert die superbereiche
 
 
 
@@ -789,25 +835,21 @@ def math():
         if not len(flatten([x.proj for x in bereich.lst])):
             break
 
-
-        waithere=0
-
         bereich.update()
-
-        
-
 
         do=True
         ProjATM=0
-
-        for i in Proj.Rlst():                                                                   #update Projekt intersection mit bereichen bereich
+        # update Projekt intersection mit bereichen bereich
+        for i in Proj.Rlst():
             i.intersect=[x for x in bereich.lst if i in x.proj() and x.active()]
 
-
-        for i in Proj.Rlst():                                                                   #Projekte  mit nur einem Bereich bearbeiten
+        # Projekte  mit nur einem Bereich bearbeiten
+        for i in Proj.Rlst():
             if len(i.intersect)==1 and i.marker:
 
                 mediumwl=99999999999999999999999999999
+
+                #calculates mediumworkload #TODO necessary? isnt it always mediumwl
                 while 1:
                     oldmediumwl=mediumwl
                     mediumwl=((i.WL-i.negwl)+sum([(x.wl*x.dom.len()) for x in i.intersect[0].children if x.wl<mediumwl]))/sum([x.dom.len() for x in i.intersect[0].children if x.wl<mediumwl])
