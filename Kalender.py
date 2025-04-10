@@ -354,6 +354,7 @@ class bereich():
        
     def __repr__(self):
         """defines the console representation of class bereich"""
+        return str(self.internalname)
         return "\n"+str(self.dom())+"  "+str(["  Proj"+str(x.internalname) for x in self.proj()])+str(self.children)+str(self.parent)
 
 
@@ -759,14 +760,13 @@ def math():
 
     new=shiftpath(sortprojforsuperbereiche([Proj.Rlst()])) # contains the lists of parentsectors [list of projects]
 
-    #region     superbereiche join überprüfen
 
     # creates domain lists for each parentsector
     superbereiche=[]
     for i in new:
         superbereiche.append(flatten(listjoin(flatten([x.dom for x in i]))))
 
-
+    # checks if there is any intersection between any subdomains of the parentsectors
     Superbereichejoin=[]
     for i in range(len(superbereiche)):
         Superbereichejoin.append([])
@@ -779,18 +779,18 @@ def math():
             if Value!=-1:
                 Superbereichejoin[i].append(Value)
 
-
-    for z in range(len(Superbereichejoin)):
+    # inserts all intersections of the indexed parentsector into the corresponding sector list
+    for z in range(len(Superbereichejoin)):  #TODO remove z, not referenced? Maybe it enables the join of all intersecting parentsecors
         for i in range(len(Superbereichejoin)):
             for j in range(len(Superbereichejoin[i])):
                 Superbereichejoin[i].extend(flatten(Superbereichejoin[Superbereichejoin[i][j]]))
                 Superbereichejoin[i]=list(set(Superbereichejoin[i]))
 
-
+    # adds all indexes unequal to i in superbereiche2 [i]
     superbereiche2=[]
     for i in range(len(Superbereichejoin)):
         superbereiche2.append([])
-        if len(Superbereichejoin[i])==0 or Superbereichejoin[i][0]!="x":
+        if len(Superbereichejoin[i])==0 or Superbereichejoin[i][0]!="x":        #TODO invert continue statement as gatekeeper
             superbereiche2[i].extend(superbereiche[i])
         else:
             continue
@@ -804,12 +804,13 @@ def math():
     for i in range(len(superbereiche2)):
         superbereiche2[i]=flatten(listjoin(superbereiche2[i]))
 
+    # converts back to superbereiche
     superbereiche=[]
     for i in superbereiche2:
         if len(i)>0:
             superbereiche.append(i)
 
-
+    # selects all Projects for each superbereiche into new list
     superbereicheProj=[]
     for j in range(len(superbereiche)):
         superbereicheProj.append([])
@@ -822,15 +823,12 @@ def math():
             if value:
                 superbereicheProj[j].append(i)
 
-    #endregion
-
     superbereich.initialise(superbereiche,superbereicheProj)  #initialisisert die superbereiche
 
-
-
-
-
-    for a in range(30):                         #berechnungsbody
+    # calculates the final wl distribution, if there is any project with just one domain fist solves this, else solves
+    # a domain with just one project. By marking the projects and domains as solved these are excluded for the next round
+    # after anything is solved alway removes solved projects from all other domains and updates the sector list
+    for a in range(30):
 
         if not len(flatten([x.proj for x in bereich.lst])):
             break
@@ -839,11 +837,11 @@ def math():
 
         do=True
         ProjATM=0
-        # update Projekt intersection mit bereichen bereich
+        # projekt.intersection mit allen bereichen füllen, in denen das Projekt activ ist
         for i in Proj.Rlst():
             i.intersect=[x for x in bereich.lst if i in x.proj() and x.active()]
 
-        # Projekte  mit nur einem Bereich bearbeiten
+        # checks for projects with just one sector and solves it
         for i in Proj.Rlst():
             if len(i.intersect)==1 and i.marker:
 
@@ -853,11 +851,10 @@ def math():
                 while 1:
                     oldmediumwl=mediumwl
                     mediumwl=((i.WL-i.negwl)+sum([(x.wl*x.dom.len()) for x in i.intersect[0].children if x.wl<mediumwl]))/sum([x.dom.len() for x in i.intersect[0].children if x.wl<mediumwl])
-                    #mediumwl=((i.WL-i.negwl)+sum([(x.wl*x.dom.len()) for x in i.intersect[0].children]))/i.intersect[0].len()
 
                     if mediumwl==oldmediumwl:
                         break
-
+                #creates the final domain and wl for the project if project workload does not exceed bereich wl
                 for j in [x for x in i.intersect[0].children if x.wl<mediumwl]:
                     i.dom2.append(j.dom)
                     i.domwl.append(mediumwl-j.wl)
@@ -877,19 +874,20 @@ def math():
 
 
 
-        if do:
+        if do:  #TODO anstatt "do" mit "else" an die for i in Proj.Rlst schleife hängen
 
-            for i in sortprojlistmaxdailywl(bereich.Rlst()):                #bereiche mit nur einer Last erkennen
-                if len(i.proj())==1:
-                    pass
+            # for every sector with just one project: adds the sectors children domain to the projects final domains
+            # and the sectors average wl to final wl list of the project, if other projects already have a workload in
+            # the sector, deduct this wl
+            for i in sortprojlistmaxdailywl(bereich.Rlst()):
+
                 if len(i.proj())==1 and i.proj()[0].marker and i.active():
                     ProjATM=flatten(i.proj()[0])[0]
                     for j in i.children:
                         j.active=False
 
-
                     if sum([x.wl for x in i.children])==0:
-
+                        #writes all children wl and dom into proj final wl and dom
                         for j in range(len(i.children)):
                             ProjATM.dom2.append([i.children[j].dom])
 
@@ -898,12 +896,10 @@ def math():
                             else:
                                 ProjATM.domwl.append(i.parent.mediumwl())
 
-                            if i.parent.mediumwl()*i.len()>=ProjATM.WL-ProjATM.negwl:
+                            if i.parent.mediumwl()*i.len()>=ProjATM.WL-ProjATM.negwl:           #TODO move into first if statement for same condition
                                 ProjATM.negwl=ProjATM.WL
                             else:
                                 ProjATM.negwl+=i.parent.mediumwl()*i.len()
-
-
 
                     else:
                         mediumwl=min(i.parent.mediumwl(),sum([x.WL for x in i.PROJ()])/i.len())                            #summe aller wl der in diesem Bereich aktiven Projekte
@@ -913,34 +909,31 @@ def math():
                             ProjATM.negwl+=((mediumwl-j.wl)*j.dom.len())
                             j.wl+=(mediumwl-j.wl)
 
-
                     ProjATM.dom2=flatten(ProjATM.dom2)
 
-                   
                     break
 
 
                 
         if ProjATM==0:
             break
-        
-        waithere=0    
 
+        # removes the project from all sectors where it is not finally inserted if there is no workload left
         if ProjATM.WL-ProjATM.negwl<=0:
-            for i in [x for x in Proj.Rlst() if not x==ProjATM]:                       
-                for j in bereich.lst:                   #loop removed das Projekt aus allen bereichen, in dem es bis jetzt nicht ist
+            for i in [x for x in Proj.Rlst() if not x==ProjATM]: #TODO remove outer loop: no impact
+
+                for j in bereich.lst:
                     value=False
                     for k in j.dom():
                         for l in ProjATM.dom2:
                             if k==l:
                                 value=True
-                    if not value:                       #wenn der bereich j nicht in Projekt.dom hinzugefügt wurde
+                    if not value:
                         for k in j.children:
                             if ProjATM in k.proj:
                                 k.proj.remove(ProjATM)
 
 
-        waithere=0
 
 def reset():
     """resets all class-lists for new calculation
@@ -966,8 +959,8 @@ def main(data=[]):
         data=[[0,30,400],[5,20,600],[35,15,300],[20,40,300],[50,15,10000],[55,25,500],[70,85,1701],[60,25,500]]        #nur indiviudelle Lasten, 2 Bereiche
 
     #TODO entfernen der data= komponente
-    data = [[0, 30, 400], [5, 20, 600], [35, 15, 300], [20, 40, 300], [50, 15, 10000], [55, 25, 500], [70, 85, 1701],
-            [60, 25, 500]]
+    #data = [[0, 30, 400], [5, 20, 600], [35, 15, 300], [20, 40, 300], [50, 15, 10000], [55, 25, 500], [70, 85, 1701],
+            #[60, 25, 500]]
     defIn(data)
     math()
     return Proj.Rlst()
