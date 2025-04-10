@@ -617,7 +617,12 @@ def sortDomlst(a):
         a1.insert(i,a[j])
     return a1
     
-def sortprojlistdailywl(a):             # sortiert eine Liste von Projekten anhand ihrer durschschnittlichen dailywl
+def sortprojlistdailywl(a):
+    """sorts a list of projects by its average daily workload in ascending order
+
+    :param a: list of projects
+    :return:
+    """
     a1=[]
     for j in range(len(a)):
         for i in range(len(a1)+1):
