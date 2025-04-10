@@ -510,18 +510,6 @@ class bereich2():
         """
         return str(self.dom)+ str(self.wl)
 
-#TODO annotations
-class PushButton(QPushButton):
-
-    def __init__(self, Proj, Parent=None):
-        text=str(Proj)
-        self.Proj=Proj
-        super(PushButton, self).__init__(text, Parent)
-        self.setText(text)
-
-    def Proj(self):
-        return self.Proj
-
 #endregion
 
 #initialisierungsmethoden
