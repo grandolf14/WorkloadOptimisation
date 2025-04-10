@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import  QPushButton
 
 #region Klassen
-
-#TODO annotations
 class dom():
+    """domain objects, defined by start end end point [int], provides different analyse and math operations for domains
 
+    """
 
 
     def consecutive(self, other):
@@ -128,9 +128,9 @@ class dom():
         """
         return "(%d to %d)" %(self.a,self.b)
 
-#TODO annotations
+
 class Proj ():
-    """manages projects properties
+    """manages the proj data
 
     :var lst: list
         contains all current project instances
@@ -139,10 +139,7 @@ class Proj ():
 
     @classmethod
     def Rlst(cls):
-        """returns the list of all current projects
-
-        :return: -> list
-        """
+        """returns the list of all current projects"""
         return Proj.lst
         
     def __lt__(self,other):
@@ -227,21 +224,27 @@ class Proj ():
         return "\nName: Proj"+str(self.internalname)+"\nDaten:"+str(self.DOM)+"\nneue Daten:" +str(self.dom2)+"\nTagesworkload:"+ str([round(x,1) for x in self.domwl])+"\ndifferenz: "+str(self.WL)+" "+str(self.WL==self.negwl)+"\n"
 
 
-#TODO annotations superbereich
 class superbereich():
     """manages the parent sectors for each sector
 
     :var lst: list
         contains all current parent sectors
 
-    :var name: int
+    :var name: int, private
         the name counter
 
     """
     lst=[]
     name=0
 
-    def __init__(self,domain=0,projekte=0,children=0):             
+    def __init__(self,domain=0,projekte=0,children=0):
+        """initializes the parent sector and if no childrens assigned creates a child for every object in domain
+
+        :param domain: the domains inside the parent sector
+        :param projekte: list of projects in the parent sector
+        :param children: list of all children of the parent sector
+        """
+
         self.internalname="superbereich "+str(superbereich.name)
         if children==0:
             self.children=[bereich(domain[x],projekte,self)for x in range(len(domain))]
@@ -252,29 +255,35 @@ class superbereich():
         superbereich.lst.append(self)
 
   
-    def mediumwl(self):                                                # [superbereich].mediumwl or superbereich.mediumwl([superbereich])      gibt das durschnittsworkload des Superbereichs aus
+    def mediumwl(self):
+        """returns the average workload for parent sector"""
         if len(self.proj())==0 or len(self.DOM())==0:
             return 0
         else:                                 
             return sum(flatten([x.WL for x in self.PROJ()] ))/sum(flatten([x.len() for x in self.DOM()]))
         
     def DOM(self):
+        """returns all startdomains of the children"""
         return flatten(listjoin([x.DOM() for x in self.children]))
 
     def dom(self):
+        """returns all current domains of the children"""
         return flatten(listjoin([x.dom() for x in self.children]))
     
     def proj(self):
+        """returns all unfinished children projects"""
         return list(set(flatten([x.proj() for x in self.children])))
     
     def PROJ(self):
+        """returns all children projects"""
         return list(set(flatten([x.PROJ() for x in self.children])))
 
-    def __repr__(self):                         #                                                                       definiert die grafische Ausgabe von Superbereichen
+    def __repr__(self):
+        """defines console apearance string"""
         return "\nBereiche:"+str(self.dom())+"mediumwl: "+str(self.mediumwl())+"\nprojekte"+str([x.internalname for x in self.proj()])#+  sort  "bereiche:"+str(self.bereiche) #+"mediumwl:"+str(self.mediumwl())
 
     @classmethod
-    def initialise(cls,bereiche,bereichsprojekte):#initialisiert eine Reihe von Instanzen aus Listen von zugeordneten Werten
+    def initialise(cls,bereiche,bereichsprojekte):
         """initializes superbereich objects from each index of bereiche and bereichsprojekte
 
         :param bereiche: list of domain-lists for each superbereich
@@ -300,9 +309,9 @@ class superbereich():
 
         [superbereich(flatten(new3[x]),bereichsprojekte[x]) for x in range(len(new3))]
 
-#TODO annotations
+
 class bereich():
-    """provides functions to work with sectors
+    """provides functions to work with sectors, manages the initialization of bereich2 objects
 
     :var lst: list, list of all initialized sectors
     :var name: int, private
@@ -317,6 +326,13 @@ class bereich():
     #Instanzmethoden
     
     def __init__(self,domain=[],projekte=[],parent=[],children=False):
+        """
+
+        :param domain: list of domains
+        :param projekte: list of projects active in this sector
+        :param parent: list with the parentsector
+        :param children: list of all children|False of the sector
+        """
         self.internalname="bereich "+str(bereich.name)
         self.parent=parent
         if children:
@@ -328,6 +344,7 @@ class bereich():
         bereich.lst.append(self)
 
     def active(self):
+        """if any of the children is still active (to be calculated) return True, else False"""
 
         return flatten([[x.active for x in self.children if x],False])[0]
 
@@ -344,7 +361,7 @@ class bereich():
         return [x for x in list(set(flatten([x.proj for x in self.children]))) if x.WL-x.negwl>0]
     
     def PROJ(self):
-        """returns all active projects of the sector"""
+        """returns all projects of the sector"""
         return sorted(list(set(flatten([x.proj for x in self.children]))))
     
     def len(self):
@@ -457,12 +474,11 @@ class bereich():
         # updates the old bereich.lst with new bereiche
         bereich.lst=finallist
 
-#TODO annotations
+
 class bereich2():
-    """subsectors are the smallest unit of sectors with equal workload
+    """subsectors are the smallest unit of sectors with equal projectspread
 
     :var lst: list of all initialized bereich2 objects
-
     :var name: int, private
         provides internal name data
     """
@@ -472,9 +488,9 @@ class bereich2():
     def __init__(self,domain,projekte,parent):
         """
 
-        :param domain:
-        :param projekte:
-        :param parent:
+        :param domain:the domains of the subsector
+        :param projekte:projects of the subsector
+        :param parent: the parent
         """
         self.internalname="bereich2 "+str(bereich2.name)
         self.parent=parent
@@ -488,7 +504,10 @@ class bereich2():
 
 
     def __repr__(self):
+        """defines the console appearance
 
+        :return: ->str
+        """
         return str(self.dom)+ str(self.wl)
 
 #TODO annotations
@@ -751,7 +770,6 @@ def shiftpath(input):
 
     return Newlist
 
-#TODO annotations
 def math():
     """calculates the optimal workload distribution and inserts the optimal distribution into the projects
 
@@ -933,8 +951,6 @@ def math():
                             if ProjATM in k.proj:
                                 k.proj.remove(ProjATM)
 
-
-
 def reset():
     """resets all class-lists for new calculation
 
@@ -958,9 +974,6 @@ def main(data=[]):
         #data=[[0,60,300], [20,100,800], [80,30,500], [70,80,400], [25,10,100]]                                         #nur indiviudelle Lasten
         data=[[0,30,400],[5,20,600],[35,15,300],[20,40,300],[50,15,10000],[55,25,500],[70,85,1701],[60,25,500]]        #nur indiviudelle Lasten, 2 Bereiche
 
-    #TODO entfernen der data= komponente
-    #data = [[0, 30, 400], [5, 20, 600], [35, 15, 300], [20, 40, 300], [50, 15, 10000], [55, 25, 500], [70, 85, 1701],
-            #[60, 25, 500]]
     defIn(data)
     math()
     return Proj.Rlst()
