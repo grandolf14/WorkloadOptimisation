@@ -6,15 +6,20 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QMainWindow, QLabel, QWidget, QPushButton, QGridLayout, QLineEdit,QMessageBox, QStackedWidget, QTabWidget
 from datetime import  datetime, timedelta
 
-#Domains der bereiche zurück in Daten verwandeln, Tabelle erstellen
-#Today: schon getätigte Workloads hinzufügen
-
-#projekte Speichern/Laden können
-#button "addworktime to projekt" hinzufügen (zum verwalten der schon getätigten worktime)
+#TODO Domains der bereiche zurück in Daten verwandeln, Tabelle erstellen
+#TODO Today: schon getätigte Workloads hinzufügen
+#TODO projekte Speichern/Laden können
+#TODO button "addworktime to projekt" hinzufügen (zum verwalten der schon getätigten worktime)
 
 class MyWindow(QMainWindow):
+    """ Holds the main Window oft the application
+
+    """
 
     def __init__(self):
+        """initializes the core Widgets and layouts
+
+        """
         super().__init__()
 
         self.setMinimumSize(QSize(350,300))
@@ -61,7 +66,10 @@ class MyWindow(QMainWindow):
         self.ProjectsWin(0)
         
     def TimeWin(self):
+        """manages the layout of the episodes in the timewin window
 
+        :return: -> None
+        """
         # removes all widgets from TabTimelinegrid
         for i in reversed(range(self.TabTimelinegrid.count())): 
             self.TabTimelinegrid.itemAt(i).widget().setParent(None)
@@ -85,7 +93,13 @@ class MyWindow(QMainWindow):
                 self.TabTimelinegrid.addWidget(label,3+j,i)
 
     def EditWin(self,index,projIndex):
+        """manages the layout and content of the project editing window
 
+        :param index: int
+            the index of current stacked widget
+        :param projIndex: int
+        :return: ->None
+        """
 
         self.projIndex=projIndex
 
@@ -131,6 +145,10 @@ class MyWindow(QMainWindow):
         Editgrid.addWidget(button)  
 
     def NewWin(self):
+        """ manages the window for new creation of projects
+
+        :return: ->None
+        """
         New=QWidget()
         self.ProjStacked.addWidget(New) 
 
@@ -140,7 +158,6 @@ class MyWindow(QMainWindow):
         Label=QLabel("New")
         Newgrid.addWidget(Label,0,0)
 
-        names=["Start","Ende","Workload"]
         self.new=[]
       
         label=QLabel("start")
@@ -173,6 +190,12 @@ class MyWindow(QMainWindow):
         Newgrid.addWidget(button)  
 
     def ProjectsWin(self, index):
+        """manages the content of the project list depiction
+
+        :param index: int
+            index of current widget in stacked Widget
+        :return: -> None
+        """
         Projects=QWidget()
         self.ProjStacked.insertWidget(index,Projects)
 
@@ -207,9 +230,15 @@ class MyWindow(QMainWindow):
             button.clicked.connect(self.btn_update_clicked)
 
             Projectsgrid.addWidget(button,2,collumn)
-        
-    def TodayWin(self):
 
+
+    def TodayWin(self):
+        """manages the content of the today-tab
+
+        :return: ->None
+        """
+
+        # remove all current widget
         for i in reversed(range(self.TabTodaygrid.count())): 
             self.TabTodaygrid.itemAt(i).widget().setParent(None)
         
@@ -234,10 +263,12 @@ class MyWindow(QMainWindow):
             label=QLabel(text)
             self.TabTodaygrid.addWidget(label,1,j)
 
-        label=QLabel
-
 
     def btn_update_clicked(self):
+        """updates all windows on_click
+
+        :return:
+        """
         self.update=False
         store.update()
         self.TimeWin()
@@ -245,7 +276,10 @@ class MyWindow(QMainWindow):
         self.btn_return_clicked()
 
     def btn_create_clicked(self):
+        """checks new project for invalid input and updates data_store
 
+        :return: ->None
+        """
         
         if self.TBStart.text().strip()=="":
             QMessageBox.about(self,"Fehler","Geben Sie ihren Projektstart ein.\nFormat:TT.MM.JJJJ")
@@ -266,6 +300,7 @@ class MyWindow(QMainWindow):
         except ValueError:
             QMessageBox.about(self,"Fehler","Bitte geben Sie ein reales Datum als Startdatum ein.\nFormat: TT.MM.JJJ")
             return
+
         try:
             datetime.strptime(self.TBEnd.text(),"%d.%m.%Y")
         except ValueError:
@@ -282,7 +317,10 @@ class MyWindow(QMainWindow):
         self.btn_return_clicked()
         
     def btn_apply_clicked(self):
+        """ checks input for invalid data and updates store.liste with new projectdata
 
+        :return: ->None
+        """
         if self.TBStart.text().strip()=="":
             QMessageBox.about(self,"Fehler","Geben Sie ihren Projektstart ein.\nFormat: TT.MM.JJJJ")
             return
@@ -318,10 +356,18 @@ class MyWindow(QMainWindow):
         self.btn_return_clicked()
 
     def btn_return_clicked(self):
+        """ standard exit function for all edits
+
+        :return: ->None
+        """
         self.ProjectsWin(0)
         self.ProjStacked.setCurrentIndex(0)
 
     def btn_delete_clicked(self):
+        """deletes project if messagebox is confirmed
+
+        :return: ->None
+        """
         msg=QMessageBox()
         msg.setText("Wollen sie das Projekt wirklich löschen?")
         msg.setWindowTitle("Löschen")
@@ -337,15 +383,28 @@ class MyWindow(QMainWindow):
             self.ProjStacked.setCurrentIndex(index+1)
 
     def btn_edit_clicked(self):
+        """ opens the editing window for selected project
+
+        :return: ->None
+        """
         button = self.sender()
         self.EditWin(0,button.page)
         self.ProjStacked.setCurrentIndex(0)
         
     def btn_new_clicked(self):
+        """ opens the window for a new project
+
+        :return: ->None
+        """
         self.NewWin()
         self.ProjStacked.setCurrentIndex(self.ProjStacked.count()-1)
 
 def listRework(liste):
+    """converts the datetime objects to project datasets each containing the start, the duration and the total workload
+
+    :param liste: nested list
+    :return: ->list, [relative start, duration in days, total workload in hours]
+    """
     Newlist=[]
     firstDate=[x[0] for x in liste]
     firstDate=sorted(firstDate)[0]
@@ -357,15 +416,22 @@ def listRework(liste):
     return Newlist
 
 class store():
+    """ manages the core Prohect data
+    :var liste: list
+        contains the core-project-data [start, end, workload] for each project
 
-    #after initialisation returns all core-Project data
+    :var updated: list
+        contains all optimized sector workloads
+    """
+
     liste=[]
-
-    #after initialisation returns all domain data
     updated=[]
     
 
     def __init__(self):
+        """reads the data.txt file, loads it into store.liste and initializes the optimisation calculation
+
+        """
 
         #reads the data.txt file if existing
         try:
@@ -377,8 +443,6 @@ class store():
             
             
             for i in range(len(list2)):
-                #print(liste)
-                #print("     ")
                 liste.append([])
                 for j in range(len(list2[i])):
                     if j==2:
@@ -400,10 +464,21 @@ class store():
         bereich.initialisation()
 
 class bereich():
+    """provides operations on each sectors data
+
+    :var lst: list of all initialized sectors
+    :var firstdate: contains the first date of all projectmanagement
+    """
     lst=[]
     firstdate=0
 
     def __init__(self,domain,proj,wl):
+        """initializes sectors
+
+        :param domain: domain object
+        :param proj: list of projects
+        :param wl: list of int
+        """
         self.dom=domain
         self.proj=[proj]
         self.workloads=[wl]
@@ -411,53 +486,64 @@ class bereich():
         bereich.lst.append(self)
 
 
-    @classmethod
-    def initialisation(bereich):
-        bereich.lst=[]
-        for i in store.updated:
-            for j in range(len(i.dom2)):
-                for k in bereich.lst:
-                    if not i.dom2[j]!=k.dom:
-                        k.proj.append(i)
-                        k.workloads.append(i.domwl[j])
-                        break
-                    else:
-                        continue
-                else:
-                    bereich(i.dom2[j],i,i.domwl[j])
-
-        a=bereich.lst
-        a1=[a.pop(0)]
-        for j in range(len(a)):
-            for i in range(len(a1)+1):
-                if i>=len(a1):
-                    break
-                if a[j].dom.a>a1[i].dom.a:
-                    continue
-                elif a[j].dom.a==a1[i].dom.a and a[j].dom.b>a1[i].dom.b:
-                    continue
-                else:
-                    break
-            a1.insert(i,a[j])
-        bereich.lst=a1
 
     def end(self):
+        """returns the enddate of the sector"""
         add=timedelta(days=self.dom.b)
         enddate=bereich.firstdate+add
         return enddate
 
     def start(self):
+        """returns the startdate of the sector"""
         add=timedelta(days=self.dom.a)
         enddate=bereich.firstdate+add
         return enddate
 
     def __repr__(self):
+        """defines console representation"""
         text=""
         for j in range(len(self.proj)):
             str2=("\nProjekt"+str(self.proj[j].internalname)+ ":\n%.2fh\n"%self.workloads[j])
             text+=str2
         return text
-    
+
+    @classmethod
+    def initialisation(cls):
+        """ converts the project information to sector information and initializes new sectors
+
+        :return: ->None
+        """
+        # appends project and corresponding workload to sector or creates a new sector if the sector misses in bereich.lst
+        bereich.lst = []
+        for project in store.updated:
+            for j in range(len(project.dom2)):
+                for k in bereich.lst:
+                    if not project.dom2[j] != k.dom: #TODO invert to gatekeeper
+                        k.proj.append(project)
+                        k.workloads.append(project.domwl[j])
+                        break
+                    else:
+                        continue
+                else:
+                    bereich(project.dom2[j], project, project.domwl[j])
+
+        #sorts the bereich.lst by startdate and secondly enddate
+        a = bereich.lst
+        a1 = [a.pop(0)]
+        for j in range(len(a)):
+            for i in range(len(a1) + 1):
+                if i >= len(a1):
+                    break
+                if a[j].dom.a > a1[i].dom.a:
+                    continue
+                elif a[j].dom.a == a1[i].dom.a and a[j].dom.b > a1[i].dom.b:
+                    continue
+                else:
+                    break
+            a1.insert(i, a[j])
+        bereich.lst = a1
+
+
 #Main Programm
 
 liste=store()
@@ -467,6 +553,7 @@ win = MyWindow()
 win.show()
 App.exec_()
 
+#saves the changed project data
 fw=open("data.txt","w")
 str=""
 for i in range(len(store.liste)):
