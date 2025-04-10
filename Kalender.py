@@ -684,8 +684,13 @@ def sortprojlistdailywl(a):
         a1.insert(i,a[j])
     return a1
 
-#TODO annotations
-def sortprojlistmaxdailywl(a):             # a= bereichliste
+#TODO review
+def sortprojlistmaxdailywl(a):
+    """sorts the bereich list descending for their maximum workload
+
+    :param a: list of bereich objects
+    :return:
+    """
     a1=[]
     for j in range(len(a)):
         for i in range(len(a1)+1):
