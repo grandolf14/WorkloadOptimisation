@@ -476,22 +476,29 @@ def defIn(data_):
         Proj(i+add, data_[i][0], data_[i][1], data_[i][2])
     
 def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,proj3]]
-    """
+    """ sorts the projects in parentsectors to enable calculation
 
-    :param Liste:
+    selects the project with highest average workload, if it is higher than the total average workload it is treated as
+    single project for further calculation and its domain is deducted from every over projects domain. Recursive calls
+    itself as long as any project in the parentsector has an higher workload than the average wl of the parentsector.
+
+    :param Liste: list, contains the list of parentsector lists [list of projects] to calculate
     :param marker:
     :return: ->list
     """
     Newlist=[]
     for i in Liste:
-        Bereiche=flatten([listjoin([x.dom for x in flatten(i)])])
-        mediumwl=(sum([x.WL for x in i])/sum([x.len() for x in (flatten(listjoin([x.dom for x in i])))]))
+        Bereiche=flatten([listjoin([x.dom for x in flatten(i)])])   #creates the sum of all listed domains
+        mediumwl=(sum([x.WL for x in i])/sum([x.len() for x in (flatten(listjoin([x.dom for x in i])))]))  #calculates mediumWL for joined sectors
         Liste2=sortprojlistdailywl(i)
         worklist=[]
         marker2=True
-        
+
+
         while Liste2[-1].dailywl()>mediumwl or len(sortprojlistdailywl(flatten(Newlist)))>0 and sortprojlistdailywl(flatten(Newlist))[-1].dailywl()>=mediumwl:
 
+            # first iteration: choses the total highest wl proj in worklist, other iteration: choses the highest
+            # workload project in newlist
             if marker2:
                 worklist.append(Liste2[-1])
                 marker2=False
@@ -507,21 +514,26 @@ def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,
                             worklist[-1].dom=flatten(worklist[-1].dom)
                         worklist=flatten(worklist)
             
-            Newlist=[]
+
             mediumwl=(sum([x.WL for x in worklist])/sum([x.len() for x in flatten(listjoin([x.dom for x in worklist]))]))
-            
+
+
+            # deducts the domain of the highest average workload project >toatal average workload from the superdomain
             Trimbereiche=flatten(listjoin(flatten([x.dom for x in worklist])))
 
             for j in range(len(Bereiche)):
                 Bereiche[j]=[Bereiche[j]-Trimbereiche[0]]
             Bereiche=flatten([Bereiche])
-            
-            for j in range(len(Bereiche)):      #appended Projekte in die Bereichsliste, wenn sie mit der errechneten Domain intersecten
+
+            # appends all projects intersecting with worklist project to deduct the worklist project from
+            Newlist = []
+            for j in range(len(Bereiche)):
                 Newlist.append([])
                 for k in i:
-                    if k.DOM==Bereiche[j]:      #maybe fix the issue with for loop+ if i.e. intersection found with any, break, else (for the loop) substract
+                    if k.DOM==Bereiche[j]:      #TODO maybe fix the issue with for loop+ if i.e. intersection found with any, break, else (for the loop) substract
                         Newlist[j].append(k)
-            
+
+            # deducts the worklist project domain from all intersecting projects
             for j in range(len(Newlist)):
                 for k in range(len(Newlist[j])):
                     for l in range(len(Newlist[j][k].dom)):
@@ -534,7 +546,10 @@ def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,
             Newlist=Liste
         else:
             Newlist.extend([worklist])
-        
+
+        # newlist contains the domains of all changed projects after deduction, each project having an own list,
+        # extracting the deductee in an own list for it is now treated as single project
+        # calculates the new mediumwl for each project
         mediumwl=[]
         for j in Newlist:
             if len(j)>1:
@@ -542,17 +557,21 @@ def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,
             else:
                 mediumwl.append(j[0].dailywl())
 
+        # if there is any project with higher mediumWL than the average wl of the current list, recursive calls
+        # itself until every project with higher workload than the superbereich average Wl is extracted as own project
         for j in range(len(Newlist)):
             Liste3=sortprojlistdailywl(Newlist[j])
-            if Liste3[-1].dailywl()>mediumwl[j] and marker!=len(Liste3):
+            if Liste3[-1].dailywl()>mediumwl[j] and marker!=len(Liste3): #TODO delete marker
                 Newlist[j]=sortprojforsuperbereiche([Liste3],len(Liste3))        
         
 
     return Newlist
 
 #werkzeugmethoden
+
+#TODO listjoin understanding and annotations
 def listjoin(a1):
-    """
+    """returns the sum of all listed domains
 
     :param a1:
     :return:
@@ -900,6 +919,9 @@ def main(data=[]):
         #data=[[0,60,300], [20,100,800], [80,30,500], [70,80,400], [25,10,100]]                                         #nur indiviudelle Lasten
         data=[[0,30,400],[5,20,600],[35,15,300],[20,40,300],[50,15,10000],[55,25,500],[70,85,1701],[60,25,500]]        #nur indiviudelle Lasten, 2 Bereiche
 
+    #TODO entfernen der data= komponente
+    data = [[0, 30, 400], [5, 20, 600], [35, 15, 300], [20, 40, 300], [50, 15, 10000], [55, 25, 500], [70, 85, 1701],
+            [60, 25, 500]]
     defIn(data)
     math()
     return Proj.Rlst()
