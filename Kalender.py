@@ -568,15 +568,14 @@ def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,
     return Newlist
 
 #werkzeugmethoden
-
-#TODO listjoin understanding and annotations
 def listjoin(a1):
     """returns the sum of all listed domains
 
-    :param a1:
-    :return:
+    checks for interection with the last item of a2, if there is none creates new entry, if there is any adds the two
+    domains
+    :param a1: list of domain objects
+    :return: list of domain objects, intersections added to one
     """
-    #erstellt die Summe aller Domains einer Liste als Domains
     a1=flatten(a1)
     if len(a1)>1:
         a1=sortDomlst(a1)
