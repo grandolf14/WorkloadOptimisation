@@ -4,11 +4,11 @@ This project is a PyQt5-based desktop application designed to manage and optimiz
 
 ## Features
 
-- **Graphical Interface**: User-friendly GUI built using PyQt5.
+- **Graphical Interface**: Easy data management with GUI, built using PyQt5.
 - **Project Management**: Create, edit, and delete projects with start/end dates and workload (in hours).
 - **Workload Optimization**: Automatically redistributes workloads to avoid overlapping or excessive workdays.
 - **Visualization**:
-  - **Today Tab**: Shows what tasks are due today.
+  - **Today Tab**: Shows what timeslots for each project are due today.
   - **Timeline Tab**: Displays workload distribution across timeframes.
   - **Project Manager Tab**: Full list of projects with controls for editing and deletion.
 - **Persistent Storage**: Saves data to a `data.txt` file for reloading project states.
@@ -48,30 +48,23 @@ This project is a PyQt5-based desktop application designed to manage and optimiz
 
 ## Data Structure & Logic
 
-The optimization algorithm splits project durations into **domains**, and organizes them into **sectors** (`bereich`) and **parentsectors** (`superbereich`). The system then calculates optimal workload distribution by recursively re-balancing overlapping segments.
+The optimization algorithm splits the overall timeframe into **domains** with equal project contribution, organizes them into **sectors** (`bereich`) and **parentsectors** (`superbereich`). The system then calculates optimal workload distribution by recursively re-balancing overlapping segments.
 
 The project data is saved in:
 ```
 data.txt
 ```
 
-
 ## Project Structure
 
 - `GUI.py`: Main file containing the PyQt5 GUI logic and data management.
 - `Kalender.py`: Contains backend logic for workload optimization and domain management.
 
-## To-Do / Known Issues
-
-- [ ] Add support for saving and loading project domains.
-- [ ] Show completed workloads under "Today".
-- [ ] Add button to register work time to a project.
-- [ ] Improve table and visualization structure.
 
 ## Author
 
-Created by Fiete Jantsch. Contributions are welcome!
+Created by Fiete Jantsch.
 
 ## License
 
-MIT License (or your preferred license)
+Apache License
