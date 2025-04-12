@@ -24,8 +24,7 @@ This project is a PyQt5-based desktop application designed to manage and optimiz
 
 2. **Download/Clone the Repository**:
    ```bash
-   git clone <https://github.com/grandolf14/WorkloadOptimisation>
-   cd <WorkloadOptimisation>
+   git clone https://github.com/grandolf14/WorkloadOptimisation
    ```
 
 3. **Run the Application**:
