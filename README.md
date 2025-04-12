@@ -1,4 +1,4 @@
-# Calendar Optimization Tool
+# Workload Optimization Tool
 
 This project is a PyQt5-based desktop application designed to manage and optimize project workloads over time. It provides a timeline interface that helps users create, view and update projects, automatically distributing workloads to optimize time usage.
 
