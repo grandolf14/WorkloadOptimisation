@@ -517,12 +517,12 @@ class bereich():
         for project in store.updated:
             for j in range(len(project.dom2)):
                 for k in bereich.lst:
-                    if not project.dom2[j] != k.dom: #TODO invert to gatekeeper
-                        k.proj.append(project)
-                        k.workloads.append(project.domwl[j])
-                        break
-                    else:
+                    if project.dom2[j] != k.dom:
                         continue
+                    k.proj.append(project)
+                    k.workloads.append(project.domwl[j])
+                    break
+
                 else:
                     bereich(project.dom2[j], project, project.domwl[j])
 
