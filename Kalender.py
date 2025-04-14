@@ -405,8 +405,9 @@ class bereich():
                         newlist[i].append(i+j)
                                                         
 
-        # creates the merged list of all bereiche with completly identical projects
-        for z in range(len(newlist)):           #TODO remove z loop, never used
+        # creates the merged list of all bereiche with completly identical projects, repeats the process several times
+        # to provide a full list merge
+        for z in range(len(newlist)):
             for i in range(len(newlist)):
                 for j in range(len(newlist[i])):
                     newlist[i].extend(flatten(newlist[newlist[i][j]]))
@@ -524,7 +525,7 @@ def defIn(data_):
     for i in range(len(data_)):
         Proj(i+add, data_[i][0], data_[i][1], data_[i][2])
     
-def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,proj3]]
+def sortprojforsuperbereiche(Liste,marker=0):
     """ sorts the projects in parentsectors to enable calculation
 
     selects the project with highest average workload, if it is higher than the total average workload it is treated as
@@ -610,7 +611,7 @@ def sortprojforsuperbereiche(Liste,marker=0):       #     #input: [[proj1,proj2,
         # itself until every project with higher workload than the superbereich average Wl is extracted as own project
         for j in range(len(Newlist)):
             Liste3=sortprojlistdailywl(Newlist[j])
-            if Liste3[-1].dailywl()>mediumwl[j] and marker!=len(Liste3): #TODO delete marker
+            if Liste3[-1].dailywl()>mediumwl[j] and marker!=len(Liste3): #TODO when is marker != len(Liste3), is there a case with dailywl>mediumwl where marker== len(Liste3)
                 Newlist[j]=sortprojforsuperbereiche([Liste3],len(Liste3))        
         
 
@@ -791,7 +792,7 @@ def math():
                 Superbereichejoin[i].append(Value)
 
     # inserts all intersections of the indexed parentsector into the corresponding sector list
-    for z in range(len(Superbereichejoin)):  #TODO remove z, not referenced? Maybe it enables the join of all intersecting parentsecors
+    for z in range(len(Superbereichejoin)):
         for i in range(len(Superbereichejoin)):
             for j in range(len(Superbereichejoin[i])):
                 Superbereichejoin[i].extend(flatten(Superbereichejoin[Superbereichejoin[i][j]]))
@@ -801,10 +802,12 @@ def math():
     superbereiche2=[]
     for i in range(len(Superbereichejoin)):
         superbereiche2.append([])
-        if len(Superbereichejoin[i])==0 or Superbereichejoin[i][0]!="x":        #TODO invert continue statement as gatekeeper
-            superbereiche2[i].extend(superbereiche[i])
-        else:
+
+        if not(len(Superbereichejoin[i])==0 or Superbereichejoin[i][0]!="x"):
             continue
+
+        superbereiche2[i].extend(superbereiche[i])
+
         for j in range(len(Superbereichejoin[i])):
             if Superbereichejoin[i][j]=="x":
                 continue
@@ -846,7 +849,6 @@ def math():
 
         bereich.update()
 
-        do=True
         ProjATM=0
         # projekt.intersection mit allen bereichen füllen, in denen das Projekt activ ist
         for i in Proj.Rlst():
@@ -858,13 +860,14 @@ def math():
 
                 mediumwl=99999999999999999999999999999
 
-                #calculates mediumworkload #TODO necessary? isnt it always mediumwl
+                #calculates mediumworkload
+                #TODO necessary? isnt it always mediumwl
                 while 1:
                     oldmediumwl=mediumwl
                     mediumwl=((i.WL-i.negwl)+sum([(x.wl*x.dom.len()) for x in i.intersect[0].children if x.wl<mediumwl]))/sum([x.dom.len() for x in i.intersect[0].children if x.wl<mediumwl])
-
                     if mediumwl==oldmediumwl:
                         break
+
                 #creates the final domain and wl for the project if project workload does not exceed bereich wl
                 for j in [x for x in i.intersect[0].children if x.wl<mediumwl]:
                     i.dom2.append(j.dom)
@@ -873,23 +876,14 @@ def math():
 
                 i.negwl=i.WL
                 i.dom2=flatten(i.dom2)
-                do=False
                 i.marker=False
-
                 ProjATM=i
-
-                
-
                 break
 
-
-
-
-        if do:  #TODO anstatt "do" mit "else" an die for i in Proj.Rlst schleife hängen
-
-            # for every sector with just one project: adds the sectors children domain to the projects final domains
-            # and the sectors average wl to final wl list of the project, if other projects already have a workload in
-            # the sector, deduct this wl
+        # for every sector with just one project: adds the sectors children domain to the projects final domains
+        # and the sectors average wl to final wl list of the project, if other projects already have a workload in
+        # the sector, deduct this wl
+        else:
             for i in sortprojlistmaxdailywl(bereich.Rlst()):
 
                 if len(i.proj())==1 and i.proj()[0].marker and i.active():
@@ -904,13 +898,10 @@ def math():
 
                             if i.parent.mediumwl()*i.len()>=ProjATM.WL-ProjATM.negwl:
                                 ProjATM.domwl.append((ProjATM.WL-ProjATM.negwl)/i.len())
+                                ProjATM.negwl = ProjATM.WL
                             else:
                                 ProjATM.domwl.append(i.parent.mediumwl())
-
-                            if i.parent.mediumwl()*i.len()>=ProjATM.WL-ProjATM.negwl:           #TODO move into first if statement for same condition
-                                ProjATM.negwl=ProjATM.WL
-                            else:
-                                ProjATM.negwl+=i.parent.mediumwl()*i.len()
+                                ProjATM.negwl += i.parent.mediumwl() * i.len()
 
                     else:
                         mediumwl=min(i.parent.mediumwl(),sum([x.WL for x in i.PROJ()])/i.len())                            #summe aller wl der in diesem Bereich aktiven Projekte
@@ -931,18 +922,16 @@ def math():
 
         # removes the project from all sectors where it is not finally inserted if there is no workload left
         if ProjATM.WL-ProjATM.negwl<=0:
-            for i in [x for x in Proj.Rlst() if not x==ProjATM]: #TODO remove outer loop: no impact
-
-                for j in bereich.lst:
-                    value=False
-                    for k in j.dom():
-                        for l in ProjATM.dom2:
-                            if k==l:
-                                value=True
-                    if not value:
-                        for k in j.children:
-                            if ProjATM in k.proj:
-                                k.proj.remove(ProjATM)
+            for j in bereich.lst:
+                value=False
+                for k in j.dom():
+                    for l in ProjATM.dom2:
+                        if k==l:
+                            value=True
+                if not value:
+                    for k in j.children:
+                        if ProjATM in k.proj:
+                            k.proj.remove(ProjATM)
 
 def reset():
     """resets all class-lists for new calculation
