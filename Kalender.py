@@ -580,7 +580,7 @@ def sortprojforsuperbereiche(Liste,marker=0):
             for j in range(len(Bereiche)):
                 Newlist.append([])
                 for k in i:
-                    if k.DOM==Bereiche[j]:      #TODO maybe fix the issue with for loop+ if i.e. intersection found with any, break, else (for the loop) substract
+                    if k.DOM==Bereiche[j]:
                         Newlist[j].append(k)
 
             # deducts the worklist project domain from all intersecting projects
@@ -679,30 +679,6 @@ def sortprojlistdailywl(a):
             if i>=len(a1):
                 break
             if a[j].dailywl()>a1[i].dailywl():
-                continue
-            else:
-                break
-        a1.insert(i,a[j])
-    return a1
-
-#TODO review
-def sortprojlistmaxdailywl(a):
-    """sorts the bereich list descending for their maximum workload
-
-    :param a: list of bereich objects
-    :return:
-    """
-    a1=[]
-    for j in range(len(a)):
-        for i in range(len(a1)+1):
-            if i>=len(a1):
-                break    
-            if len(a[j].proj())==0:
-                i=len(a1)+1
-                break
-            if len(a[j].proj())>len(a1[i].proj()):
-                continue
-            elif len(a[j].proj())==len(a1[i].proj()) and (a[j].proj()[0].WL/a[j].len())>(a1[i].proj()[0].WL/a1[i].len()): 
                 continue
             else:
                 break
@@ -860,8 +836,10 @@ def math():
 
                 mediumwl=99999999999999999999999999999
 
-                #calculates mediumworkload
-                #TODO necessary? isnt it always mediumwl
+                # calculates average workload of this sector, for calculation exclude all subsectors with higher workload
+                # than current average workload. Calculation:
+                # (not assigned project workload+ sum of already assigned workload in subsectors)/(sum of length of all subsectors)
+                # sets average workload to result of last calculation and repeats as long as the workload changes by repeating
                 while 1:
                     oldmediumwl=mediumwl
                     mediumwl=((i.WL-i.negwl)+sum([(x.wl*x.dom.len()) for x in i.intersect[0].children if x.wl<mediumwl]))/sum([x.dom.len() for x in i.intersect[0].children if x.wl<mediumwl])
@@ -884,7 +862,7 @@ def math():
         # and the sectors average wl to final wl list of the project, if other projects already have a workload in
         # the sector, deduct this wl
         else:
-            for i in sortprojlistmaxdailywl(bereich.Rlst()):
+            for i in bereich.Rlst():
 
                 if len(i.proj())==1 and i.proj()[0].marker and i.active():
                     ProjATM=flatten(i.proj()[0])[0]
