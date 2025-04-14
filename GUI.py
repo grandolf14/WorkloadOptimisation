@@ -6,7 +6,6 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QMainWindow, QLabel, QWidget, QPushButton, QGridLayout, QLineEdit,QMessageBox, QStackedWidget, QTabWidget
 from datetime import  datetime, timedelta
 
-#TODO Domains der bereiche zurück in Daten verwandeln, Tabelle erstellen
 #TODO Today: schon getätigte Workloads hinzufügen
 #TODO projekte Speichern/Laden können
 #TODO button "addworktime to projekt" hinzufügen (zum verwalten der schon getätigten worktime)
